@@ -1,3 +1,4 @@
+# ─── STAGE 1: BUILD ──────────────────────────────────────
 FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /app
