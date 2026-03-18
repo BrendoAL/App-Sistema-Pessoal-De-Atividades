@@ -1,0 +1,49 @@
+name: activity-service CI
+
+on:
+  push:
+    paths:
+      - 'activity-service/**'
+  pull_request:
+    paths:
+      - 'activity-service/**'
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Permissão no gradlew
+        working-directory: activity-service
+        run: chmod +x gradlew
+
+      - name: Rodar testes
+        working-directory: activity-service
+        run: ./gradlew test --no-daemon
+
+      - name: Publicar relatório de testes
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: activity-service-test-report
+          path: activity-service/build/reports/tests/test/
+          retention-days: 7
+
+      - name: Build do jar
+        working-directory: activity-service
+        run: ./gradlew bootJar --no-daemon -x test
+
+      - name: Build da imagem Docker
+        working-directory: activity-service
+        run: docker build -t lambda-app/activity-service:${{ github.sha }} .

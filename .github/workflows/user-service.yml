@@ -1,0 +1,49 @@
+name: user-service CI
+
+on:
+  push:
+    paths:
+      - 'user-service/**'        # só dispara quando user-service mudar
+  pull_request:
+    paths:
+      - 'user-service/**'
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle           # faz cache das dependências Gradle
+
+      - name: Permissão no gradlew
+        working-directory: user-service
+        run: chmod +x gradlew
+
+      - name: Rodar testes
+        working-directory: user-service
+        run: ./gradlew test --no-daemon
+
+      - name: Publicar relatório de testes
+        uses: actions/upload-artifact@v4
+        if: always()              # publica mesmo se os testes falharem
+        with:
+          name: user-service-test-report
+          path: user-service/build/reports/tests/test/
+          retention-days: 7
+
+      - name: Build do jar
+        working-directory: user-service
+        run: ./gradlew bootJar --no-daemon -x test
+
+      - name: Build da imagem Docker
+        working-directory: user-service
+        run: docker build -t lambda-app/user-service:${{ github.sha }} .
