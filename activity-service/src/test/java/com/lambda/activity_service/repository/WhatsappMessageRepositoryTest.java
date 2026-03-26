@@ -1,7 +1,7 @@
 package com.lambda.activity_service.repository;
 
-import com.lambda.activity_service.activity.WhatsappMessage;
-import com.lambda.activity_service.activity.WhatsappMessageRepository;
+import com.lambda.activity_service.whatsappmessage.WhatsappMessage;
+import com.lambda.activity_service.whatsappmessage.WhatsappMessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
