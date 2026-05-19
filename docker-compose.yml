@@ -35,27 +35,6 @@ services:
       timeout: 5s
       retries: 5
 
-  evolution-api:
-    image: atendai/evolution-api:v2.1.1
-    container_name: evolution-api
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      SERVER_URL: http://localhost:8080
-      AUTHENTICATION_API_KEY: lambda-secret-key
-      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
-      QRCODE_LIMIT: 30
-      CACHE_REDIS_ENABLED: "false"
-      CACHE_LOCAL_ENABLED: "true"
-      DATABASE_ENABLED: "true"
-      DATABASE_PROVIDER: mysql
-      DATABASE_CONNECTION_URI: mysql://root:root@mysql:3306/evolution_db?createDatabaseIfNotExist=true&charset=utf8mb4&ssl=false
-    volumes:
-      - evolution_instances:/evolution/instances
-    networks:
-      - app-network
-
   user-service:
     build: ./user-service
     container_name: user-service
@@ -105,13 +84,9 @@ services:
     restart: always
     depends_on:
       - rabbitmq
-      - evolution-api
     environment:
       PORT: 3000
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-      EVOLUTION_API_URL: http://evolution-api:8080
-      EVOLUTION_API_KEY: lambda-secret-key
-      EVOLUTION_INSTANCE: prod-bot
       USER_SERVICE_URL: http://user-service:8081
       ACTIVITY_SERVICE_URL: http://activity-service:8082
     ports:
@@ -125,12 +100,9 @@ services:
     restart: always
     depends_on:
       - rabbitmq
-      - evolution-api
     environment:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-      EVOLUTION_API_URL: http://evolution-api:8080
-      EVOLUTION_API_KEY: lambda-secret-key
-      EVOLUTION_INSTANCE: prod-bot
+      WHATSAPP_BOT_URL: http://whatsapp-bot:3000
     networks:
       - app-network
 
@@ -173,7 +145,6 @@ services:
 
 volumes:
   mysql_data:
-  evolution_instances:
   # grafana_data:
 
 networks:
